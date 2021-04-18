@@ -153,17 +153,19 @@ class SNPDataEnsemble:
                     if SSforLD.at[index, 'Label'] != 'nan':
                         if ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']) and ((str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
                             numberofIndependentLD=1
-                        elif ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']):
+                        elif ((str(index) + ".LD") not in SNPsData.at[preneighbourhood, 'Label']) and ((str(index) + ".LD") not in SNPsData.at[postneighbourhood, 'Label']):
+                            numberofIndependentLD=3
+                        elif ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']) and ((str(index) + ".LD") not in SNPsData.at[postneighbourhood, 'Label']):
                             numberofIndependentLD=2
-                        elif ((str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
+                        elif ((str(index) + ".LD") not in SNPsData.at[preneighbourhood, 'Label']) and ((str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
                             numberofIndependentLD=2
                     elif SSforLD.at[index, 'Label'] == 'nan':
                         if (SSforLD.at[index, 'Label'] ==SSforLD.at[preneighbourhood, 'Label']) and (SSforLD.at[index, 'Label'] ==SSforLD.at[postneighbourhood, 'Label']):
                             numberofIndependentLD=3
-                        elif (SSforLD.at[index, 'Label'] ==SSforLD.at[preneighbourhood, 'Label']):
-                            numberofIndependentLD=2
-                        elif (SSforLD.at[index, 'Label'] ==SSforLD.at[postneighbourhood, 'Label']):
-                            numberofIndependentLD=2
+                        elif (SSforLD.at[index, 'Label'] !=SSforLD.at[preneighbourhood, 'Label']):
+                            numberofIndependentLD=3
+                        elif (SSforLD.at[index, 'Label'] !=SSforLD.at[postneighbourhood, 'Label']):
+                            numberofIndependentLD=3
                     else: numberofIndependentLD="*"
                     #SNPsData.at[index, 'Score Middle'] = numberofIndependentLD
 
@@ -237,21 +239,25 @@ class SNPDataEnsemble:
                 if (isinstance(preneighbourhood, int) & isinstance(postneighbourhood, int)):
                     SSforLD = SNPsData[int(preneighbourhood): int(postneighbourhood) + 1]
 
+
                     if SSforLD.at[index, 'Label'] != 'nan':
                         if ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']) and ((str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
                             numberofIndependentLD=1
-                        elif ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']):
+                        elif ((str(index) + ".LD") not in SNPsData.at[preneighbourhood, 'Label']) and ((str(index) + ".LD") not in SNPsData.at[postneighbourhood, 'Label']):
+                            numberofIndependentLD=3
+                        elif ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']) and ((str(index) + ".LD") not in SNPsData.at[postneighbourhood, 'Label']):
                             numberofIndependentLD=2
-                        elif ((str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
+                        elif ((str(index) + ".LD") not in SNPsData.at[preneighbourhood, 'Label']) and ((str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
                             numberofIndependentLD=2
                     elif SSforLD.at[index, 'Label'] == 'nan':
                         if (SSforLD.at[index, 'Label'] ==SSforLD.at[preneighbourhood, 'Label']) and (SSforLD.at[index, 'Label'] ==SSforLD.at[postneighbourhood, 'Label']):
                             numberofIndependentLD=3
-                        elif (SSforLD.at[index, 'Label'] ==SSforLD.at[preneighbourhood, 'Label']):
-                            numberofIndependentLD=2
-                        elif (SSforLD.at[index, 'Label'] ==SSforLD.at[postneighbourhood, 'Label']):
-                            numberofIndependentLD=2
+                        elif (SSforLD.at[index, 'Label'] !=SSforLD.at[preneighbourhood, 'Label']):
+                            numberofIndependentLD=3
+                        elif (SSforLD.at[index, 'Label'] !=SSforLD.at[postneighbourhood, 'Label']):
+                            numberofIndependentLD=3
                     else: numberofIndependentLD="*"
+
                     #SNPsData.at[index, 'Score Middle'] = numberofIndependentLD
 
                     if (isinstance(preneighbourhood, int) & isinstance(postneighbourhood, int) & isinstance(startframe, int) & isinstance(endframe, int)):
@@ -326,21 +332,33 @@ class SNPDataEnsemble:
                 if (isinstance(preneighbourhood, int) & isinstance(postneighbourhood, int)):
                     SSforLD = SNPsData[int(preneighbourhood): int(postneighbourhood) + 1]
 
-                    if SSforLD.at[index, 'Label'] != 'nan':
-                        if ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']) and ((str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
-                            numberofIndependentLD=1
-                        elif ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']):
-                            numberofIndependentLD=2
-                        elif ((str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
-                            numberofIndependentLD=2
-                    elif SSforLD.at[index, 'Label'] == 'nan':
-                        if (SSforLD.at[index, 'Label'] ==SSforLD.at[preneighbourhood, 'Label']) and (SSforLD.at[index, 'Label'] ==SSforLD.at[postneighbourhood, 'Label']):
-                            numberofIndependentLD=3
-                        elif (SSforLD.at[index, 'Label'] ==SSforLD.at[preneighbourhood, 'Label']):
-                            numberofIndependentLD=2
-                        elif (SSforLD.at[index, 'Label'] ==SSforLD.at[postneighbourhood, 'Label']):
-                            numberofIndependentLD=2
-                    else: numberofIndependentLD="*"
+                    if (isinstance(preneighbourhood, int) & isinstance(postneighbourhood, int)):
+                        SSforLD = SNPsData[int(preneighbourhood): int(postneighbourhood) + 1]
+
+                        if SSforLD.at[index, 'Label'] != 'nan':
+                            if ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']) and (
+                                    (str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
+                                numberofIndependentLD = 1
+                            elif ((str(index) + ".LD") not in SNPsData.at[preneighbourhood, 'Label']) and (
+                                    (str(index) + ".LD") not in SNPsData.at[postneighbourhood, 'Label']):
+                                numberofIndependentLD = 3
+                            elif ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']) and (
+                                    (str(index) + ".LD") not in SNPsData.at[postneighbourhood, 'Label']):
+                                numberofIndependentLD = 2
+                            elif ((str(index) + ".LD") not in SNPsData.at[preneighbourhood, 'Label']) and (
+                                    (str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
+                                numberofIndependentLD = 2
+                        elif SSforLD.at[index, 'Label'] == 'nan':
+                            if (SSforLD.at[index, 'Label'] == SSforLD.at[preneighbourhood, 'Label']) and (
+                                    SSforLD.at[index, 'Label'] == SSforLD.at[postneighbourhood, 'Label']):
+                                numberofIndependentLD = 3
+                            elif (SSforLD.at[index, 'Label'] != SSforLD.at[preneighbourhood, 'Label']):
+                                numberofIndependentLD = 3
+                            elif (SSforLD.at[index, 'Label'] != SSforLD.at[postneighbourhood, 'Label']):
+                                numberofIndependentLD = 3
+                        else:
+                            numberofIndependentLD = "*"
+
                     #SNPsData.at[index, 'Score Middle'] = numberofIndependentLD
 
                     if (isinstance(preneighbourhood, int) & isinstance(postneighbourhood, int) & isinstance(startframe, int) & isinstance(endframe, int)):
