@@ -11,7 +11,7 @@ class SNPDataEnsemble:
 
     LDCorrelationCoefficient=0.70 #default
     print("Reading SNPs Data (Combined):")
-    df_SNPsData = pd.read_excel(io='C:/Users/Onur/Desktop/Yeşim Hoca/SNPDataset.xlsx',
+    df_SNPsData = pd.read_excel(io='C:/Users/Onur/Desktop/SNPDataset.xlsx',
                                 sheet_name='SNPDataset (Combined) (3)')
     df_SNPsData['ChrNumber'] = df_SNPsData['Chromosome'].str[3:]
     df_SNPsData['Label'] = df_SNPsData['Label'].astype(str)
@@ -44,7 +44,7 @@ class SNPDataEnsemble:
     print("Reading SNPs Data (Combined) Completed Successfully...")
     print("--------")
     print("\n Reading LDs Data (Proxy Data:)")
-    df_LDsData = pd.read_excel(io='C:/Users/Onur/Desktop/Yeşim Hoca/SNPDataset.xlsx', sheet_name='proxySearch.results')
+    df_LDsData = pd.read_excel(io='C:/Users/Onur/Desktop/SNPDataset.xlsx', sheet_name='proxySearch.results')
     #print('Data Fields: ', df_LDsData.columns.ravel())
     df_LDsData = df_LDsData[["QRSID", "RSID", "R2", "POS2", "DIST"]]
     #print(df_LDsData.info(verbose=True))
