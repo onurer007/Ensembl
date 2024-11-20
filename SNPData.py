@@ -8,14 +8,12 @@ import matplotlib.pyplot as plot
 
 
 class SNPDataEnsemble:
-
-    LDCorrelationCoefficient=0.70 #default
+    LDCorrelationCoefficient=0.70 #default value but can be changed
     print("Reading SNPs Data (Combined):")
     df_SNPsData = pd.read_excel(io='C:/Users/Onur/Desktop/SNPDataset.xlsx',
-                                sheet_name='SNPDataset (Combined) (3)')
+                                sheet_name='SNPDataset (Combined) (3)') # SNPs are given in SNPDataset.xlsx
     df_SNPsData['ChrNumber'] = df_SNPsData['Chromosome'].str[3:]
     df_SNPsData['Label'] = df_SNPsData['Label'].astype(str)
-
     # Define the sorter
     sorter = ['chr1', 'chr2', 'chr3', 'chr4', 'chr5', 'chr6', 'chr7', 'chr8', 'chr9', 'chr10', 'chr11',
               'chr12', 'chr13', 'chr14', 'chr15', 'chr16', 'chr17', 'chr18', 'chr19', 'chr20', 'chr21', 'chr22', 'chrX',
@@ -23,33 +21,17 @@ class SNPDataEnsemble:
     # Create the dictionary that defines the order for sorting
     sorterIndex = dict(zip(sorter, range(len(sorter))))
     print("Sorter Index Created by Chromosome Number...")
-    #print(sorterIndex)
     df_SNPsData['Chr_Rank'] = df_SNPsData['Chromosome'].map(sorterIndex)
-
     df_SNPsData.sort_values(by=['Chr_Rank','Position'], ascending=[True, True], inplace=False)
     df_SNPsData['AutoNumberAfterSort'] = df_SNPsData.reset_index().index
-    # df_SNPsData['ChrNumber']=df_SNPsData['ChrNumber'].astype(int)
-    # pd.to_numeric(df_SNPsData['ChrNumber'])
-    #print('Data Fields: ', df_SNPsData.columns.ravel())
-    # print(df_SNPsData.head(10))
     print( df_SNPsData.info(verbose=True))
-
-
     df_SNPsData = df_SNPsData[
         ["Score UP", "Score Middle", "Score BOTTOM", "Label", "Order", "SNP", "Chromosome","Position", "Chr_Rank", "DATABASE", "checkPRFRF"]]
-    #print(df_SNPsData.head(10))
-
-
-
     print("Reading SNPs Data (Combined) Completed Successfully...")
     print("--------")
     print("\n Reading LDs Data (Proxy Data:)")
     df_LDsData = pd.read_excel(io='C:/Users/Onur/Desktop/SNPDataset.xlsx', sheet_name='proxySearch.results')
-    #print('Data Fields: ', df_LDsData.columns.ravel())
     df_LDsData = df_LDsData[["QRSID", "RSID", "R2", "POS2", "DIST"]]
-    #print(df_LDsData.info(verbose=True))
-    #print(df_LDsData.head(10))
-
     print("Reading LDs Data (Proxy Data:) Completed Successfully...")
     print("--------")
     while True:
@@ -62,21 +44,18 @@ class SNPDataEnsemble:
                 break
         else:
             print("Please enter the value correctly, it must be a real number between 0 and 1")
-
     print("LDs Data is Being Preprocessed Based On Selected Coefficient: " ,LDCorrelationCoefficient)
     a = df_LDsData.sort_values(by=['DIST'], ascending=[False])
-    #df_LDsData = a[ (a['QRSID']!=a['RSID'])&(a['R2'] > LDCorrelationCoefficient)&(a['DIST'] > 0)]
     df_LDsData = a[(a['QRSID'] != a['RSID']) & (a['R2'] > LDCorrelationCoefficient) ]
+
+
 
     def writeToExcelFile(x, processType):
         if processType == 'SNP':
             with ExcelWriter('path_to_file_SNP.xlsx') as writer:
                 x.to_excel(writer)
-                #print('SNPs Succesfully Exported To Excel')
-
+                print('SNPs Succesfully Exported To Excel')
         if processType == 'LD':
-            #string_value = str(LD)
-            #string_value=string_value.replace(".", "_")
             filename=('path_to_file_LD_Reference_Table.xlsx')
             with ExcelWriter(filename) as writer:
                 x.to_excel(writer)
@@ -85,7 +64,6 @@ class SNPDataEnsemble:
             with ExcelWriter('path_to_file_SNP-LD_Relation.xlsx') as writer:
                 x.to_excel(writer)
                 print('SNPs are Succesfully Mapped by LDs and Exported To Excel')
-
 
 
 
@@ -100,17 +78,16 @@ class SNPDataEnsemble:
                         RelatedLD.append(rowLD['RSID'])
                 print (RelatedLD)
                 LDDict[row ["checkPRFRF"]]=RelatedLD
-        #print(LDDict)
-        #print(LDDict["rs1333190"])
         w = csv.writer(open("DeterminedLDOutput.csv", "w"))
         for key, val in LDDict.items():
             w.writerow([key, val])
         return LDDict
+    
+	
 
     def calculateCenteredScore(SNPsData):
         for index, row in SNPsData.iterrows():
             if not pd.isna(row["checkPRFRF"]):
-                # investigate number of databases
                 if index>0:
                     prev=index-1
                     while ((str(index) + ".LD") in SNPsData.at [prev,'Label']):
@@ -118,7 +95,6 @@ class SNPDataEnsemble:
                     startframe=prev
                 else:
                     startframe=prev
-
                 if index<len(SNPsData)-1:
                     nxt = index + 1
                     while ((str(index) + ".LD") in SNPsData.at[nxt, 'Label']):
@@ -126,19 +102,13 @@ class SNPDataEnsemble:
                     endframe = nxt
                 else:
                     endframe=None
-
                 file1 = open("MiddleScoreStartEnd.txt", "a")
                 st = ("For #" + str(index) + " index value [Start: " + str(startframe) + ", End:" + str(endframe) + "]\n")
-                #print(st)
                 file1.writelines (st)
                 file1.close()
-
                 if(isinstance(startframe, int) & isinstance(endframe, int)):
                     SSforDB = SNPsData[int(startframe): int(endframe) + 1]
                     numberofDatabase = SSforDB['DATABASE'].nunique()
-                    #SNPsData.at[index, 'Score Middle'] = numberofDatabase
-
-                # invesitgate number of LDs neighbourhood
                 if index>0:
                     preneighbourhood= index-1
                 else: preneighbourhood=None
@@ -146,10 +116,8 @@ class SNPDataEnsemble:
                     postneighbourhood=index+1
                 else:
                     postneighbourhood=None
-
                 if (isinstance(preneighbourhood, int) & isinstance(postneighbourhood, int)):
                     SSforLD = SNPsData[int(preneighbourhood): int(postneighbourhood) + 1]
-
                     if SSforLD.at[index, 'Label'] != 'nan':
                         if ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']) and ((str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
                             numberofIndependentLD=1
@@ -167,12 +135,11 @@ class SNPDataEnsemble:
                         elif (SSforLD.at[index, 'Label'] !=SSforLD.at[postneighbourhood, 'Label']):
                             numberofIndependentLD=3
                     else: numberofIndependentLD="*"
-                    #SNPsData.at[index, 'Score Middle'] = numberofIndependentLD
-
                     if (isinstance(preneighbourhood, int) & isinstance(postneighbourhood, int) & isinstance(startframe, int) & isinstance(endframe, int)):
                         SNPsData.at[index, 'Score Middle'] = (1*numberofDatabase) + (1/10*numberofIndependentLD) + (1/100)
                     else:
                         SNPsData.at[index, 'Score Middle'] =None
+
 
 
     def calculateFrameFirstScore (SNPsData):
@@ -181,7 +148,6 @@ class SNPDataEnsemble:
                 if index==0:
                     startframe=index
                 elif index>0:
-                    #startframe=index
                     prev=index-1
                     counter=0
                     while ((str(index) + ".LD") in SNPsData.at[prev, 'Label']):
@@ -189,13 +155,10 @@ class SNPDataEnsemble:
                         prev=prev-1
                         if prev==0:
                             break
-                    #startframe = index
                     if counter > 0:
                         startframe = prev+1
                     else:
                         startframe = index
-
-
                 if index<len(SNPsData)-2:
                     nxt = index + 1
                     counter=0
@@ -214,20 +177,13 @@ class SNPDataEnsemble:
                         endframe=nxt+1
                 else:
                     endframe=None
-
                 file2 = open("FrameFirstStartEnd.txt", "a")
                 st = ("For #" + str(index) + " index value [Start: " + str(startframe) + ", End:" + str(endframe) + "]\n")
-                #print(st)
                 file2.writelines (st)
                 file2.close()
-
                 if (isinstance(startframe, int) & isinstance(endframe, int)):
                     SSforDB = SNPsData[int(startframe): int(endframe) + 1]
                     numberofDatabase = SSforDB['DATABASE'].nunique()
-                    # SNPsData.at[index, 'Score Middle'] = numberofDatabase
-
-
-                # invesitgate number of LDs neighbourhood
                 if index>0:
                     preneighbourhood= index-1
                 else: preneighbourhood=None
@@ -235,11 +191,8 @@ class SNPDataEnsemble:
                     postneighbourhood=index+1
                 else:
                     postneighbourhood=None
-
                 if (isinstance(preneighbourhood, int) & isinstance(postneighbourhood, int)):
                     SSforLD = SNPsData[int(preneighbourhood): int(postneighbourhood) + 1]
-
-
                     if SSforLD.at[index, 'Label'] != 'nan':
                         if ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']) and ((str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
                             numberofIndependentLD=1
@@ -257,9 +210,6 @@ class SNPDataEnsemble:
                         elif (SSforLD.at[index, 'Label'] !=SSforLD.at[postneighbourhood, 'Label']):
                             numberofIndependentLD=3
                     else: numberofIndependentLD="*"
-
-                    #SNPsData.at[index, 'Score Middle'] = numberofIndependentLD
-
                     if (isinstance(preneighbourhood, int) & isinstance(postneighbourhood, int) & isinstance(startframe, int) & isinstance(endframe, int)):
                         SNPsData.at[index, 'Score UP'] = (1*numberofDatabase) + (1/10*numberofIndependentLD) + (1/100)
                     else:
@@ -289,8 +239,6 @@ class SNPDataEnsemble:
                             startframe = None
                 else:
                     startframe=None
-
-
                 if index == len(SNPsData) - 1:
                     endframe=index
                 elif index>1 and index < len(SNPsData) - 1 :
@@ -301,26 +249,19 @@ class SNPDataEnsemble:
                         nxt = nxt + 1
                         if nxt == len(SNPsData) - 1:
                             break
-
                     if counter > 0:
                         endframe = nxt - 1
                     elif counter==0:
                         endframe = index
                 else:
                     endframe=None
-
                 file3 = open("FrameLastStartEnd.txt", "a")
                 st = ("For #" + str(index) + " index value [Start: " + str(startframe) + ", End:" + str(endframe) + "]\n")
                 file3.writelines (st)
                 file3.close()
-
                 if (isinstance(startframe, int) & isinstance(endframe, int)):
                     SSforDB = SNPsData[int(startframe): int(endframe) + 1]
                     numberofDatabase = SSforDB['DATABASE'].nunique()
-                    # SNPsData.at[index, 'Score Middle'] = numberofDatabase
-
-
-                # invesitgate number of LDs neighbourhood
                 if index>0:
                     preneighbourhood= index-1
                 else: preneighbourhood=None
@@ -328,13 +269,10 @@ class SNPDataEnsemble:
                     postneighbourhood=index+1
                 else:
                     postneighbourhood=None
-
                 if (isinstance(preneighbourhood, int) & isinstance(postneighbourhood, int)):
                     SSforLD = SNPsData[int(preneighbourhood): int(postneighbourhood) + 1]
-
                     if (isinstance(preneighbourhood, int) & isinstance(postneighbourhood, int)):
                         SSforLD = SNPsData[int(preneighbourhood): int(postneighbourhood) + 1]
-
                         if SSforLD.at[index, 'Label'] != 'nan':
                             if ((str(index) + ".LD") in SNPsData.at[preneighbourhood, 'Label']) and (
                                     (str(index) + ".LD") in SNPsData.at[postneighbourhood, 'Label']):
@@ -358,9 +296,6 @@ class SNPDataEnsemble:
                                 numberofIndependentLD = 3
                         else:
                             numberofIndependentLD = "*"
-
-                    #SNPsData.at[index, 'Score Middle'] = numberofIndependentLD
-
                     if (isinstance(preneighbourhood, int) & isinstance(postneighbourhood, int) & isinstance(startframe, int) & isinstance(endframe, int)):
                         SNPsData.at[index, 'Score BOTTOM'] = (1*numberofDatabase) + (1/10*numberofIndependentLD) + (1/100)
                     else:
@@ -375,29 +310,17 @@ class SNPDataEnsemble:
 
 
 
-
-
-
-
-
-
     def assignLinkDiseqLabels (SNPsData, LDDict):
-
         for index, row in SNPsData.iterrows():
             if not pd.isna(row["checkPRFRF"]):
                 key=row["checkPRFRF"]
                 LDValues=LDDict[row["checkPRFRF"]]
                 print (key, ": ",  LDValues, "->", len (LDValues) )
                 print('\n')
-
                 if len(LDValues)>0:
                     for i in LDValues:
                         ind=int(SNPsData[SNPsData["SNP"] == i].index.values)
-                        #print ("Individul değer:", ind)
-                        #print (SNPsData.at [ind,'Label'])
-                        #print (pd.isnull(SNPsData.loc[ind,'Label']))
                         if SNPsData.at [ind,'Label']=='nan':
-                        #if pd.isnull(SNPsData.at [ind,'Label']):
                             st = str(index) + ".LD"
                             SNPsData.at[ind, 'Label'] = st
                             SNPsData.at[index, 'Label'] = st
@@ -408,8 +331,9 @@ class SNPDataEnsemble:
         return SNPsData
 
 
+
     if __name__ == "__main__":
-        print('\n',"Scoring Has Been Started.....")
+        print('\n',"Scoring Algorithm Has Been Started.....")
         print("******************************")
         print("After filtering is implemented over LD Pairwise Data: ", len(df_LDsData),'\n')
         print("After combining Significant SNPs from Different Databases: ",len(df_SNPsData),'\n')
@@ -418,9 +342,7 @@ class SNPDataEnsemble:
         writeToExcelFile(df_LDsData, "LD")
         LDDictionary=findLinkageDisequilibrium (df_SNPsData,df_LDsData)
         print(LDDictionary)
-        #print(LDDictionary["rs1333190"])
         df_SNPsData=assignLinkDiseqLabels(df_SNPsData, LDDictionary)
-        #print(df_SNPsData.head(10))
         writeToExcelFile(df_SNPsData, "LD-Relationship")
         calculateCenteredScore(df_SNPsData)
         writeToExcelFile(df_SNPsData, "LD-Relationship")
@@ -430,17 +352,13 @@ class SNPDataEnsemble:
         writeToExcelFile(df_SNPsData, "LD-Relationship")
         finalScores=maxScore(df_SNPsData)
         writeToExcelFile(df_SNPsData, "LD-Relationship")
-
         temp = df_SNPsData.groupby(['Max Scores'])['Max Scores'].count().to_frame('Count').reset_index()
         formattedPoints = ["%.2f" % member for member in temp.iloc[:, 0]]
         points = list(formattedPoints)
         print (points)
         count = list(temp.iloc[:, 1])
         print (count)
-        #temp['Max Scores']=temp['Max Scores'].values.astype(str)
         temp['Max Scores'] = 'p' + temp['Max Scores'].astype(str)
-        #writeToExcelFile(temp, "LD-Relationship")
-
         bars=plot.bar(points, count, color ='maroon', width = 0.3, align='center')
         plot.xlabel("Available Scores")
         plot.ylabel("Observation")
